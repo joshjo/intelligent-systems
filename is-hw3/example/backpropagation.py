@@ -201,3 +201,28 @@ class Backpropagation(object):
             accuracy = self.get_accuracy(actual, predicted)
             scores.append(accuracy)
         print('accuracy', sum(scores) / float(len(scores)))
+
+
+if __name__ == '__main__':
+    learning_rate = 0.1
+    num_iterations = 500
+    hidden_layers = 6
+    num_folds = 2
+    model = Backpropagation(
+        learning_rate, num_iterations, hidden_layers, num_folds)
+
+    filename = 'seeds_dataset.csv'
+    dataset = load_csv(filename)
+    for i in range(len(dataset[0])-1):
+        str_column_to_float(dataset, i)
+
+    str_column_to_int(dataset, len(dataset[0])-1)
+
+    # minmax = dataset_minmax(dataset)
+    # normalize_dataset(dataset, minmax)
+
+    print('dataset', dataset)
+
+    model.run(dataset)
+    print(model.predict(dataset[]))
+    # print(len(dataset[0]))
