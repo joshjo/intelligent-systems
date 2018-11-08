@@ -15,52 +15,6 @@ def derivative(output):
     return output * (1.0 - output)
 
 
-# Load a CSV file
-def load_csv(filename):
-    dataset = list()
-    with open(filename, 'r') as file:
-        csv_reader = reader(file)
-        for row in csv_reader:
-            if not row:
-                continue
-            dataset.append(row)
-    return dataset
-
-# Convert string column to float
-def str_column_to_float(dataset, column):
-    for row in dataset:
-        value = row[column].strip()
-        if value:
-            row[column] = float(value)
-        else:
-            row[column] = 1
-
-
-# Convert string column to integer
-def str_column_to_int(dataset, column):
-    class_values = [row[column] for row in dataset]
-    unique = set(class_values)
-    lookup = dict()
-    for i, value in enumerate(unique):
-        lookup[value] = i
-    for row in dataset:
-        row[column] = lookup[row[column]]
-    return lookup
-
-
-# Find the min and max values for each column
-def dataset_minmax(dataset):
-    minmax = list()
-    stats = [[min(column), max(column)] for column in zip(*dataset)]
-    return stats
-
-# Rescale dataset columns to the range 0-1
-def normalize_dataset(dataset, minmax):
-    for row in dataset:
-        for i in range(len(row) - 1):
-            row[i] = (row[i] - minmax[i][0]) / (minmax[i][1] - minmax[i][0])
-
-
 class Backpropagation(object):
     def __init__(
             self,
@@ -201,3 +155,28 @@ class Backpropagation(object):
             accuracy = self.get_accuracy(actual, predicted)
             scores.append(accuracy)
         print('accuracy', sum(scores) / float(len(scores)))
+
+
+if __name__ == '__main__':
+    learning_rate = 0.1
+    num_iterations = 500
+    hidden_layers = 6
+    num_folds = 2
+    model = Backpropagation(
+        learning_rate, num_iterations, hidden_layers, num_folds)
+
+    filename = 'seeds_dataset.csv'
+    dataset = load_csv(filename)
+    for i in range(len(dataset[0])-1):
+        str_column_to_float(dataset, i)
+
+    str_column_to_int(dataset, len(dataset[0])-1)
+
+    # minmax = dataset_minmax(dataset)
+    # normalize_dataset(dataset, minmax)
+
+    print('dataset', dataset)
+
+    model.run(dataset)
+    print(model.predict(dataset[]))
+    # print(len(dataset[0]))
