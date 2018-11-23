@@ -1,10 +1,6 @@
 import re
 import numpy as np
 import pandas as pd
-import tensorflow as tf
-import utils as utl
-from collections import Counter
-
 
 from gensim.models import Word2Vec
 from nltk.stem.porter import PorterStemmer
@@ -59,4 +55,7 @@ df = pd.read_csv('shuffled_movie_data.csv')
 X = df['review']
 y = df['sentiment']
 
+xx = np.array([tokenizer(i) for i in X])
 
+wmodel = Word2Vec(xx, size=100, window=5, min_count=1, workers=4)
+print(wmodel.wv.similar_by_word('paris'))
