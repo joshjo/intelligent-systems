@@ -14,7 +14,6 @@ if __name__ == '__main__':
         X.append(feature_extractor(review))
     model.fit(np.array(X), np.array(sentiments))
 
-
     print('->', model.predict(np.array(
         [feature_extractor("I love this movie")]
     )))
