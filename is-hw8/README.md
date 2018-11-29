@@ -179,25 +179,19 @@ import operator
 from collections import defaultdict
 
 
-def mean(numbers):
-    n = len(numbers)
-    return float(sum(numbers)) / n
+mean = lambda N: float(sum(N)) / len(N)
 
 
-def stdev(numbers):
-    avg = mean(numbers)
-    n = len(numbers)
-    sum_diff = sum([pow(x - avg, 2) for x in numbers])
+def stdev(X):
+    avg = mean(X)
+    n = len(X)
+    sum_diff = sum([(x - avg) ** 2 for x in X])
     return math.sqrt(float(sum_diff) / (n - 1))
 
 
 def gauss(x, mean, stdev):
-    """
-    rename to gauss
-    """
-
     exponent = math.exp(
-        -(math.pow(x - mean, 2) / (2 * math.pow(stdev, 2))))
+        -(math.pow(x - mean, 2) / (2 * (stdev ** 2))))
     return (1 / (math.sqrt(2 * math.pi) * stdev)) * exponent
 
 
@@ -251,11 +245,6 @@ class NaiveBayes(object):
 
 
 ```python
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.25, random_state = 0)
-```
-
-
-```python
 model = NaiveBayes()
 model.train(X_train, y_train)
 ```
@@ -270,10 +259,10 @@ model.probabilities
 
 
 
-    {0: [{'mean': 33.507936507936506, 'stdev': 7.8460038938513375},
-      {'mean': 60179.89417989418, 'stdev': 24623.104052499802}],
-     1: [{'mean': 45.990990990990994, 'stdev': 8.591216969033491},
-      {'mean': 85594.5945945946, 'stdev': 42397.97987862981}]}
+    {0: [{'mean': -0.45740325684887, 'stdev': 0.7770074481431039},
+      {'mean': -0.27263526623273193, 'stdev': 0.7139012035159843}],
+     1: [{'mean': 0.7788217616615897, 'stdev': 0.8508075784647239},
+      {'mean': 0.4642168046665438, 'stdev': 1.229250739365146}]}
 
 
 
@@ -284,12 +273,12 @@ y_predict =[model.predict(x) for x in X_test]
 
 
 ```python
-cm = confusion_matrix(y_test, y_predict)
+cm_own_model = confusion_matrix(y_test, y_predict)
 ```
 
 
 ```python
-cm
+cm_own_model
 ```
 
 
@@ -301,3 +290,16 @@ cm
 
 
 We can check here that the confusion matrix is the same
+
+
+```python
+cm_own_model == cm
+```
+
+
+
+
+    array([[ True,  True],
+           [ True,  True]])
+
+
