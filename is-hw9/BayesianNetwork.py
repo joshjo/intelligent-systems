@@ -1,11 +1,17 @@
 import networkx as nx
+import itertools
 import numbers
 import pprint
+import operator
 import matplotlib.pyplot as plt
 from functools import reduce
 
 
 pp = pprint.PrettyPrinter(indent=4)
+
+
+def prod(iterable):
+    return reduce(operator.mul, iterable, 1)
 
 
 class BayesianNetwork(object):
@@ -35,9 +41,6 @@ class BayesianNetwork(object):
         plt.show()
 
     def infer(self, variable):
-        # cpd_variable = self.CPD[variable]
-        # if isinstance(cpd_variable[0], numbers.Number):
-        #     return cpd_variable
         parents = self.G.in_edges(variable)
         if not parents:
             return self.CPD.get(variable, [])
@@ -47,27 +50,12 @@ class BayesianNetwork(object):
             cpd_parents.append(self.infer(parent))
         cpd = self.CPD.get(variable)
 
-        print('cpd_parents', cpd_parents)
-        print('cpd', cpd)
-        print(list(zip(*cpd)))
-        # for parent in cpd_parents
-        # parent_factors = zip(*cpd_parents)
-        # print(list(zip(*cpd_parents)))
-
-        # for values in cpd:
-        #     for x in values:
-        #         for a, b in zip(*cpd_parents)
-        #         print('x', x)
-        return []
-        # print(parents)
-        # for parent in parents:
-
-        # return self.CPD[variable]
-        # print(self.CPD['variable'])
-        # if len(self.CPD[variable]) == 1:
-        #     return self.CPD[variable]
-        # #
-        # return []
+        x = [prod(i) for i in itertools.product(*cpd_parents)]
+        res = []
+        for elems in zip(*cpd):
+            res.append(
+                sum([e * i for e, i in zip(elems, x)]))
+        return res
 
 
 # if __name__ == '__main__':
@@ -85,20 +73,15 @@ x.add_cpd('sat', [[0.95, 0.05], [0.2, 0.8]])
 x.add_cpd(
     'grade',
     [
-        # [
-            [0.3, 0.4, 0.3],
-            [0.05, 0.25, 0.7],
-        # ],
-        # [
-            [0.9, 0.08, 0.02],
-            [0.5, 0.3, 0.2]
-        # ],
+        [0.3, 0.4, 0.3],
+        [0.05, 0.25, 0.7],
+        [0.9, 0.08, 0.02],
+        [0.5, 0.3, 0.2],
     ]
 )
 x.add_cpd('letter', [[0.1, 0.9], [0.4, 0.6], [0.99, 0.01]])
 
 pp.pprint(x.CPD)
 
-infer = x.infer('grade')
+infer = x.infer('letter')
 print(infer)
-# print("x.infer('diff')", )
