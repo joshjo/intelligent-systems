@@ -20,13 +20,11 @@ def train(x_train, y_train, epochs=8000, alpha=0.0001):
     for epoch in range(1, epochs + 1):
         y = np.array([[sum(i)] for i in (w * x_train)])
         pp = y * y_train
-        count = 0
         for j, val in enumerate(pp):
             if(val >= 1):
                 cost = 0
                 w = w - alpha * (2 * 1 / epochs * w)
             else:
-                cost = 1 - val
                 w = w + alpha * (x_train[j] * y_train[j] - 2 * 1 / epoch * w)
     return w
 
@@ -40,7 +38,7 @@ def get_accuracy(x_test, weights):
             predictions.append(1)
         else:
             predictions.append(-1)
-    return accuracy_score(y_test,predictions)
+    return accuracy_score(y_test, predictions)
 
 
 if __name__ == '__main__':
@@ -49,5 +47,5 @@ if __name__ == '__main__':
     x_train, x_test, y_train, y_test = train_test_split(X, Y, train_size=0.9)
     w = train(x_train, y_train)
     acc = get_accuracy(x_test, w)
-    plot_data(X, yy, w)
+    # plot_data(X, yy, w)
     print('accuracy', acc)
