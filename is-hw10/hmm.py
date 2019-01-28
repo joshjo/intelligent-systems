@@ -37,6 +37,9 @@ start_probability = {
 #     start_probability.append(val)
 transition_probability = []
 
+print('start_probability', start_probability)
+
+
 # # find transition probability from tag Ti ti tag Tj
 # transition_probability = []
 
