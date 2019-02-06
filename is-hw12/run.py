@@ -1,7 +1,12 @@
+import matplotlib as mpl
+mpl.use('TkAgg')
+import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
 import cv2 as cv
 import plot_utils
+
+from collections import defaultdict
 
 import plot_utils
 import mnist_data
@@ -22,12 +27,33 @@ batch_size = 128
 add_noise = True
 n_epochs = 5
 
+def get_label(arr):
+    i = -1
+    for i, x in enumerate(arr):
+        if x == 1:
+            break
+    return i
+
+
+map_labels = defaultdict(list)
+
+
+# def get_numbers(input, image):
 
 if __name__ == '__main__':
     train_total_data, train_size, _, _, test_data, test_labels = mnist_data.prepare_MNIST_data()
+    map_test_labels = {}
 
-    print('len test', len(test_labels), len(test_data))
-    print('test_labels', test_labels[90])
+    img = cv.imread('results/PRR_epoch_29.jpg', 0)
+
+    for i in range(100):
+        item = test_labels[i]
+        map_labels[get_label(item)].append(i)
+
+
+
+    # print('len test', len(test_labels), len(test_data))
+    # print('test_labels', test_labels[90])
 
     n_samples = train_size
 
@@ -62,6 +88,7 @@ if __name__ == '__main__':
     min_tot_loss = 1e99
 
     # with tf.Session() as sess:
+    sess = tf.Session()
     sess.run(tf.global_variables_initializer(), feed_dict={keep_prob : 0.9})
 
     for epoch in range(n_epochs):
@@ -82,11 +109,11 @@ if __name__ == '__main__':
             if add_noise:
                 batch_xs_input = batch_xs_input * np.random.randint(2, size=batch_xs_input.shape)
                 batch_xs_input += np.random.randint(2, size=batch_xs_input.shape)
-            
+
             _, tot_loss, loss_likelihood, loss_divergence = sess.run(
                 (train_op, loss, neg_marginal_likelihood, KL_divergence),
                 feed_dict={x_hat: batch_xs_input, x: batch_xs_target, keep_prob : 0.9})
-        
+
         if min_tot_loss > tot_loss or epoch + 1 == n_epochs:
             min_tot_loss = tot_loss
 
@@ -97,9 +124,16 @@ if __name__ == '__main__':
 
         # print cost every epoch
         print("epoch %d: L_tot %03.2f L_likelihood %03.2f L_divergence %03.2f" % (epoch, tot_loss, loss_likelihood, loss_divergence))
-    
+
     # for i in range(10):
     y_PRR = sess.run(y, feed_dict={x_hat: x_PRR, keep_prob : 1})
     print('y_PRR', y_PRR)
     y_PRR_img = y_PRR.reshape(PRR.n_tot_imgs, IMAGE_SIZE, IMAGE_SIZE)
             # PRR.save_images(y_PRR_img, name="/PRR_epoch_test_%02d" % (i + 1) + ".jpg")
+    sess.close()
+
+
+# def read_image(img):
+#     offset =
+#     img[:28, :28]
+    # cv.imread()
