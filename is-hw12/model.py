@@ -25,7 +25,8 @@ dim_z = 20
 n_hidden = 500
 batch_size = 128
 add_noise = True
-n_epochs = 5
+n_epochs = 1
+
 
 def get_label(arr):
     i = -1
@@ -36,13 +37,11 @@ def get_label(arr):
 
 
 class Model(object):
-    def __init__(self, num_epochs):
+    def __init__(self, num_epochs, keep_prob):
         self.num_epochs = num_epochs
-
+        self.keep_prob = keep_prob
         self.train_total_data, train_size, _, _, test_data, test_labels = mnist_data.prepare_MNIST_data()
         map_test_labels = {}
-
-        img = cv.imread('results/PRR_epoch_29.jpg', 0)
 
         map_labels = defaultdict(list)
 
@@ -56,7 +55,7 @@ class Model(object):
             tf.float32, shape=[None, dim_img], name='input_img')
         self.x = tf.placeholder(
             tf.float32, shape=[None, dim_img], name='target_img')
-        self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
+        # self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
         z_in = tf.placeholder(
             tf.float32, shape=[None, dim_z], name='latent_variable')
         self.y, self.z, self.loss, self.neg_marginal_likelihood, self.KL_divergence = vae.autoencoder(
@@ -82,7 +81,7 @@ class Model(object):
         self.total_batch = int(self.n_samples / batch_size)
 
 
-    def train(self):
+    def train(self, sess):
         PRR = self.PRR
         keep_prob = self.keep_prob
         train_total_data = self.train_total_data
@@ -99,10 +98,8 @@ class Model(object):
         KL_divergence = self.KL_divergence
 
         min_tot_loss = 1e99
-        sess = tf.Session()
-        sess.run(tf.global_variables_initializer(), feed_dict={keep_prob : 0.9})
 
-        for epoch in range(n_epochs):
+        for epoch in range(self.num_epochs):
 
             # Random shuffling
             np.random.shuffle(train_total_data)
@@ -137,9 +134,16 @@ class Model(object):
             print("epoch %d: L_tot %03.2f L_likelihood %03.2f L_divergence %03.2f" % (
                 epoch, tot_loss, loss_likelihood, loss_divergence))
 
+    def predict(self, sess):
+        x_PRR = self.x_PRR
+        y = self.y
+        x_hat = self.x_hat
+        PRR = self.PRR
+        keep_prob = self.keep_prob
         # for i in range(10):
         y_PRR = sess.run(y, feed_dict={x_hat: x_PRR, keep_prob : 1})
         print('y_PRR', y_PRR)
         y_PRR_img = y_PRR.reshape(PRR.n_tot_imgs, IMAGE_SIZE, IMAGE_SIZE)
-                # PRR.save_images(y_PRR_img, name="/PRR_epoch_test_%02d" % (i + 1) + ".jpg")
-        sess.close()
+        PRR.save_images(y_PRR_img, name="/predict.jpg")
+        img = cv.imread('results/predict', 0)
+        return img

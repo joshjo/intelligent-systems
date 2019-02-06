@@ -1,8 +1,7 @@
 import tensorflow as tf
 
-# Gaussian MLP as encoder
-def gaussian_MLP_encoder(x, n_hidden, n_output, keep_prob):
-    with tf.variable_scope("gaussian_MLP_encoder"):
+def encoder(x, n_hidden, n_output, keep_prob):
+    with tf.variable_scope("encoder"):
         # initializers
         w_init = tf.contrib.layers.variance_scaling_initializer()
         b_init = tf.constant_initializer(0.)
@@ -35,10 +34,9 @@ def gaussian_MLP_encoder(x, n_hidden, n_output, keep_prob):
 
     return mean, stddev
 
-# Bernoulli MLP as decoder
-def bernoulli_MLP_decoder(z, n_hidden, n_output, keep_prob, reuse=False):
+def decoder(z, n_hidden, n_output, keep_prob, reuse=False):
 
-    with tf.variable_scope("bernoulli_MLP_decoder", reuse=reuse):
+    with tf.variable_scope("decoder", reuse=reuse):
         # initializers
         w_init = tf.contrib.layers.variance_scaling_initializer()
         b_init = tf.constant_initializer(0.)
@@ -69,13 +67,13 @@ def autoencoder(x_hat, x, dim_img, dim_z, n_hidden, keep_prob):
 
     print("--- autoencoder ---")
     # encoding
-    mu, sigma = gaussian_MLP_encoder(x_hat, n_hidden, dim_z, keep_prob)
+    mu, sigma = encoder(x_hat, n_hidden, dim_z, keep_prob)
 
     # sampling by re-parameterization technique
     z = mu + sigma * tf.random_normal(tf.shape(mu), 0, 1, dtype=tf.float32)
 
     # decoding
-    y = bernoulli_MLP_decoder(z, n_hidden, dim_img, keep_prob)
+    y = decoder(z, n_hidden, dim_img, keep_prob)
     y = tf.clip_by_value(y, 1e-8, 1 - 1e-8)
 
     # loss
@@ -91,8 +89,4 @@ def autoencoder(x_hat, x, dim_img, dim_z, n_hidden, keep_prob):
 
     return y, z, loss, -marginal_likelihood, KL_divergence
 
-def decoder(z, dim_img, n_hidden):
-
-    y = bernoulli_MLP_decoder(z, n_hidden, dim_img, 1.0, reuse=True)
-
-    return y
+#     return y
